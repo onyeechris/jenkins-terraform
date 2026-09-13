@@ -78,16 +78,16 @@ so values must come from `terraform.tfvars` (or `-var`/`-var-file` on the CLI).
 
 ### `terraform.tfvars`
 ```hcl
-profile            = "e2esaprofile"
+profile            = "smart-multicloud"
 vpc_cidr_block     = "172.16.0.0/16"
 my_public_subnets  = ["172.16.1.0/24", "172.16.2.0/24", "172.16.3.0/24"]
 my_private_subnets = ["172.16.4.0/24", "172.16.5.0/24", "172.16.6.0/24"]
 ```
-Concrete values for this environment: AWS CLI profile `e2esaprofile` (same profile
-name used in `packer-aws` — change it if this cluster should live under a different
-profile/account), a `/16` VPC split into three `/24` public subnets and three `/24`
-private subnets (one pair per AZ, matched up positionally with whatever AZs
-`data.tf` returns).
+Concrete values for this environment: AWS CLI profile `smart-multicloud` (an
+existing local profile, account `647371007555`, region `us-east-1` — change it if
+this cluster should live under a different profile/account), a `/16` VPC split into
+three `/24` public subnets and three `/24` private subnets (one pair per AZ,
+matched up positionally with whatever AZs `data.tf` returns).
 
 ### `maint.tf`
 The main resource file (note: "maint" — main/maintenance — not a typo for anything
@@ -119,8 +119,8 @@ version control.
 
 - Terraform CLI
 - AWS CLI configured with a profile matching `profile` in `terraform.tfvars`
-  (default: `e2esaprofile`), e.g. `aws configure --profile e2esaprofile`, with
-  permissions to create VPC/EKS/IAM resources
+  (currently `smart-multicloud`), with permissions to create VPC/EKS/IAM resources.
+  Verify it works with `aws sts get-caller-identity --profile smart-multicloud`.
 - The S3 bucket referenced in `backened.tf` (`my-terraform-eks-cicd`) must already exist in `us-east-1` — Terraform does not create its own backend bucket
 - `kubectl` and the AWS CLI, to interact with the cluster after it's up
 

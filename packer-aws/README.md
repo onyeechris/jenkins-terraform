@@ -56,7 +56,7 @@ Ubuntu AMIs). None have defaults, so they must come from a `-var-file` (or `-var
 
 ### `values.pkrvars.hcl`
 ```hcl
-  profile       = "e2esaprofile"
+  profile       = "smart-multicloud"
   ami_name      = "e2esa-aws-ubuntu-golden"
   instance_type = "t2.micro"
   region        = "us-east-1"
@@ -64,7 +64,8 @@ Ubuntu AMIs). None have defaults, so they must come from a `-var-file` (or `-var
   ssh_username  = "ubuntu"
 ```
 The actual values fed to `variable.pkr.hcl` for this build: AWS CLI profile
-`e2esaprofile`, output AMI named `e2esa-aws-ubuntu-golden`, built on a `t2.micro`
+`smart-multicloud` (an existing local profile, account `647371007555`, region
+`us-east-1`), output AMI named `e2esa-aws-ubuntu-golden`, built on a `t2.micro`
 in `us-east-1` starting from base AMI `ami-053b0d53c279acc90`, logging in as `ubuntu`.
 Edit this file (AWS profile, region, source AMI, etc.) to point the build at your
 own account/region.
@@ -143,7 +144,7 @@ installing/configuring Packer and the AWS CLI, and the same `packer init` /
 ## Prerequisites
 
 - [Packer](https://developer.hashicorp.com/packer/install) installed
-- AWS CLI installed and configured with a profile matching `profile` in `values.pkrvars.hcl` (default: `e2esaprofile`), with permissions to launch/stop EC2 instances and register AMIs
+- AWS CLI installed and configured with a profile matching `profile` in `values.pkrvars.hcl` (currently `smart-multicloud`), with permissions to launch/stop EC2 instances and register AMIs. Verify it works with `aws sts get-caller-identity --profile smart-multicloud`.
 
 ## Usage
 
@@ -163,9 +164,9 @@ packer validate -var-file="values.pkrvars.hcl" .
 packer build -var-file="values.pkrvars.hcl" .
 ```
 
-This launches a temporary EC2 instance from `source_ami`, installs nginx, then
-bakes and registers a new AMI named per `ami_name` (`e2esa-aws-ubuntu-golden`
-by default), along with a Vagrant box and a compressed artifact from the
-post-processors.
+This launches a temporary EC2 instance from `source_ami` under the `smart-multicloud`
+profile, installs nginx, then bakes and registers a new AMI named per `ami_name`
+(`e2esa-aws-ubuntu-golden` by default), along with a Vagrant box and a compressed
+artifact from the post-processors.
 
 See `aws-pkr-v01/readme.md` for links to AWS CLI install/configure guides.

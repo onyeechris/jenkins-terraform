@@ -1,4 +1,4 @@
-  profile       = "e2esaprofile"
+  profile       = "smart-multicloud"
   ami_name      = "e2esa-aws-ubuntu-golden"
   instance_type = "t2.micro"
   region        = "us-east-1"
