@@ -18,10 +18,13 @@ node group, using the community `terraform-aws-modules` modules.
 ### `provider.tf`
 ```hcl
 provider "aws" {
-  region = "us-east-1"
+  region  = "us-east-1"
+  profile = var.profile
 }
 ```
-Configures the AWS provider. All resources in this stack are created in `us-east-1`.
+Configures the AWS provider: all resources are created in `us-east-1`, using the
+local AWS CLI profile named in `var.profile` (same pattern as `packer-aws`) instead
+of whatever the default credentials happen to be.
 
 ### `backened.tf`
 ```hcl
@@ -50,6 +53,11 @@ the VPC module in `maint.tf` so subnets are spread across all AZs automatically.
 
 ### `variables.tf`
 ```hcl
+variable "profile" {
+  description = "aws profile name"
+  type        = string
+}
+
 variable "vpc_cidr_block" {
   description = "cidr_block for my vpc"
   type        = string
@@ -64,19 +72,22 @@ variable "my_private_subnets" {
   type        = list(string)
 }
 ```
-Declares the three inputs the stack needs: the VPC's CIDR block and the lists of
-public/private subnet CIDRs. No defaults are set, so values must come from
-`terraform.tfvars` (or `-var`/`-var-file` on the CLI).
+Declares the four inputs the stack needs: which local AWS CLI profile to use, the
+VPC's CIDR block, and the lists of public/private subnet CIDRs. No defaults are set,
+so values must come from `terraform.tfvars` (or `-var`/`-var-file` on the CLI).
 
 ### `terraform.tfvars`
 ```hcl
+profile            = "e2esaprofile"
 vpc_cidr_block     = "172.16.0.0/16"
 my_public_subnets  = ["172.16.1.0/24", "172.16.2.0/24", "172.16.3.0/24"]
 my_private_subnets = ["172.16.4.0/24", "172.16.5.0/24", "172.16.6.0/24"]
 ```
-Concrete values for this environment: a `/16` VPC split into three `/24` public
-subnets and three `/24` private subnets (one pair per AZ, matched up positionally
-with whatever AZs `data.tf` returns).
+Concrete values for this environment: AWS CLI profile `e2esaprofile` (same profile
+name used in `packer-aws` — change it if this cluster should live under a different
+profile/account), a `/16` VPC split into three `/24` public subnets and three `/24`
+private subnets (one pair per AZ, matched up positionally with whatever AZs
+`data.tf` returns).
 
 ### `maint.tf`
 The main resource file (note: "maint" — main/maintenance — not a typo for anything
@@ -107,7 +118,9 @@ version control.
 ## Prerequisites
 
 - Terraform CLI
-- AWS credentials configured (`aws configure` or environment variables) with permissions to create VPC/EKS/IAM resources
+- AWS CLI configured with a profile matching `profile` in `terraform.tfvars`
+  (default: `e2esaprofile`), e.g. `aws configure --profile e2esaprofile`, with
+  permissions to create VPC/EKS/IAM resources
 - The S3 bucket referenced in `backened.tf` (`my-terraform-eks-cicd`) must already exist in `us-east-1` — Terraform does not create its own backend bucket
 - `kubectl` and the AWS CLI, to interact with the cluster after it's up
 
